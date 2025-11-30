@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="jumbotron bg-primary text-white py-5 mb-5 rounded">
+    <h1 class="display-4">{{ faculty.name }}</h1>
+    <p class="lead">Факультет цифровых технологий и не только</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <h3>Новости факультета</h3>
+        {% for item in news %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>{{ item.title }}</h5>
+                <small class="text-muted">{{ item.created_at|date:"d.m.Y H:i" }}</small>
+                <p class="mt-2">{{ item.content|linebreaks }}</p>
+            </div>
+        </div>
+        {% empty %}
+        <p>Новостей пока нет.</p>
+        {% endfor %}
+    </div>
+
+    <div class="col-lg-4">
+        <h3>Студенческие группы</h3>
+        <ul class="list-group">
+            {% for group in groups %}
+            <li class="list-group-item d-flex justify-content-between">
+                <span>{{ group.name }} ({{ group.course }}-курс)</span>
+                <span class="badge bg-primary rounded-pill">{{ group.students.count }}</span>
+            </li>
+            {% empty %}
+            <li class="list-group-item">Групп пока нет</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

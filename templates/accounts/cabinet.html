@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Личный кабинет — {{ user.get_role_display }}</h1>
+<p><strong>ФИО:</strong> {{ user.get_full_name }} ({{ user.username }})</p>
+<p><strong>Факультет:</strong> {{ user.faculty }}</p>
+<div class="export-buttons" style="margin: 20px 0; text-align: center;">
+    <a href="{% url 'export_ical' %}" class="btn btn-success">ICS → В календарь</a>
+    <a href="{% url 'export_pdf' %}" class="btn btn-danger">PDF → Распечатать</a>
+    <a href="{% url 'export_excel' %}" class="btn btn-primary">Excel</a>
+</div>
+{% if user.role == "student" %}
+    <h3 class="mt-4">Ваше расписание</h3>
+    {% include "schedule_table.html" with lessons=lessons %}
+{% elif user.role == "teacher" %}
+    <h3 class="mt-4">Ваши занятия</h3>
+    {% include "schedule_table.html" with lessons=lessons %}
+{% else %}
+    <h3 class="mt-4">Расписание вашего факультета</h3>
+    {% include "schedule_table.html" with lessons=lessons %}
+{% endif %}
+{% endblock %}

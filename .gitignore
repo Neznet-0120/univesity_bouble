@@ -1,0 +1,112 @@
+# Python / Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+pip-log/
+
+# Virtual environments
+.venv*/
+venv*/
+ENV*/
+env*/
+
+# Django stuff
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+*.sqlite3
+
+# Migrations (раскомментируй, если НЕ хочешь коммитить миграции)
+/migrations/
+
+# Static & Media (обычно не коммитим, если собираем через collectstatic)
+static/
+media/
+
+# IDE / Editors
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# PyCharm
+#  JetBrains specific template is maintained in a separate JetBrains.gitignore that exists
+#  in the top-level Gitignore directory of GitHub
+# .idea/**/workspace.xml
+# .idea/**/tasks.xml
+# .idea/**/usage.statistics.xml
+# .idea/**/dictionaries
+# .idea/**/shelf
+# .idea/
+
+# VS Code
+.vscode/*
+
+# macOS
+.DS_Store
+*.DS_Store
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Node / Frontend (если используешь npm/yarn в проекте)
+node_modules/
+npm-debug.log
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Celery
+celerybeat-schedule
+celeryd.pid
+
+# Testing & Coverage
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.tox/
+.pytest_cache/
+
+# Docker
+*.env
+.env
+*.env.*
+.env.local
+
+# Deployment
+*.manifest
+*.spec
+
+# Misc
+*.swp
+*~
+
+# Если используешь docker-compose
+docker-compose.override.yml
+
+# Если используешь poetry
+.poetry/
+
+# Если используешь pipenv
+Pipfile.lock

@@ -1,0 +1,43 @@
+<!-- templates/schedule/pdf_raspisanie.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Расписание — {{ user.get_full_name }}</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; margin: 40px; }
+        h1 { text-align: center; color: #1a5fb4; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #333; padding: 10px; text-align: center; }
+        th { background: #1a5fb4; color: white; }
+        .day { background: #e6f3ff; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Расписание занятий</h1>
+    <p><strong>Студент/Преподаватель:</strong> {{ user.get_full_name }} ({{ user.username }})</p>
+    <p><strong>Семестр:</strong> Осень 2025</p>
+
+    {% for day, lessons in days.items %}
+        <h2 class="day">{{ day }}</h2>
+        <table>
+            <tr>
+                <th>Время</th>
+                <th>Предмет</th>
+                <th>Преподаватель</th>
+                <th>Группа</th>
+                <th>Аудитория</th>
+            </tr>
+            {% for l in lessons %}
+            <tr>
+                <td>{{ l.time_start|time:"H:i" }}–{{ l.time_end|time:"H:i" }}</td>
+                <td>{{ l.subject }}</td>
+                <td>{{ l.teacher }}</td>
+                <td>{{ l.group }}</td>
+                <td>{{ l.classroom|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+</body>
+</html>
