@@ -17,18 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
-from rest_framework.routers import DefaultRouter
 from django.conf.urls.static import static
-from accounts.views import home, faculty_detail
-from api.views import LessonViewSet
 
-router = DefaultRouter()
-router.register(r'api/lessons', LessonViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("api/", include(router.urls)),
-    path('accounts/', include("accounts.urls")),
-    path('', home, name="home"),
-    path("faculty/<slug:slug>/", faculty_detail, name="faculty_detail"),
+    path('api/', include('api.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
