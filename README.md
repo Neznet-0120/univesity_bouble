@@ -1,115 +1,131 @@
-# University Double — Web platform for university
+# University Double — платформа для университета
 
-Brief project README for the Django web platform in this repository.
+Ниже — подробная документация по структуре проекта и по основным файлам. Документ написан так, чтобы разработчик, открывший репозиторий, мог быстро понять назначение каждого важного файла/модуля.
 
-**Project Summary**
- - **Name:** `university_double`
- - **Type:** Django web application (university scheduling / information platform)
- - **Database:** SQLite (`db.sqlite3` included for development)
- - **Primary apps:** `accounts`, `core`, `groups_app`, `news`, `schedule`
-
-**Quick Features**
- - **User accounts** and authentication (see `accounts` app).
- - **Schedule management** and export/printing views (see `schedule` app and templates).
- - **News and announcements** (see `news` app).
- - **Administrative interface** via Django admin; models registered in each app's `admin.py`.
- - **REST API**: a basic API is available in the `api` app (built with Django REST Framework).
- - **PDF export**: schedule export to PDF is available (uses `xhtml2pdf`) via an export endpoint (e.g. `accounts` has `export/pdf/`).
-
-**Prerequisites**
- - Python 3.8+ (match your environment; project developed for standard Django 3.x/4.x workflows)
- - Git (optional)
-
-**Recommended environment (Windows PowerShell)**
- 1. Create and activate a virtual environment:
-
- ```powershell
- python -m venv .venv
- .\.venv\Scripts\Activate.ps1
- ```
-
- 2. Install dependencies (add your `requirements.txt` if you have one). If you don't have a requirements file yet, install Django and common packages:
-
- ```powershell
- pip install --upgrade pip
- pip install django
- ```
-```powershell
-pip install djangorestframework xhtml2pdf
-```
-
- 3. Apply database migrations and create a superuser:
-
- ```powershell
- python manage.py migrate
- python manage.py createsuperuser
- ```
-
- 4. Run development server:
-
- ```powershell
- python manage.py runserver
- ```
-
- Open `http://127.0.0.1:8000/` in a browser. Admin is at `http://127.0.0.1:8000/admin/`.
-
-**Project layout (important files)**
- - `manage.py` : Django management entrypoint.
- - `db.sqlite3` : Default SQLite database for development.
- - `university/` : Django project package.
-	 - `university/settings/` : `base.py`, `development.py`, `production.py` (environment-specific settings).
-	 - `university/urls/` : main URL routing (`main.py`).
- - Apps:
-	 - `accounts/` : user auth, forms, views, URLs.
-	 - `core/` : core models and utilities.
-	 - `groups_app/` : group-related models.
-	 - `news/` : news articles and admin integration.
-	 - `schedule/` : schedule models, views, and templates.
-		- `api/` : serializers and viewsets for REST API endpoints (requires `djangorestframework`).
- - `templates/` : project templates including `base.html`, `schedule_table.html`, and app-specific subfolders.
- - `static/` and `media/` : static files and uploaded media.
-
-**Settings & environment**
- - The repo includes `university/settings/development.py` and `production.py`. Use `development.py` for local work.
- - For secret keys and credentials, prefer environment variables or a `.env` file loaded by your settings (not included in the repo).
-
-**Running tests**
- Run Django tests for all apps:
-
- ```powershell
- python manage.py test
- ```
-
- If you want to run tests for a specific app, add the app name: `python manage.py test accounts`.
-
-**Static files & media**
- - Collect static files for production:
-
- ```powershell
- python manage.py collectstatic
- ```
-
- - During development, static files are served by Django when `DEBUG = True`.
-
-**Deployment notes (high-level)**
- - Use a production-ready database (PostgreSQL or MySQL) instead of SQLite.
- - Serve static files via a CDN or web server (Nginx) after `collectstatic`.
- - Use a WSGI/ASGI server such as Gunicorn or Daphne behind Nginx.
- - Securely manage secrets using environment variables or a secret store.
-
-**Contributing**
- - Add issues/feature requests to the repository tracker.
- - Follow the repository code style, open PRs against `main`, and describe the change clearly.
-
-**Next steps / Suggestions**
- - Add a `requirements.txt` (run `pip freeze > requirements.txt` in your virtualenv) so other developers can install exact dependencies.
- - Add badges (CI, PyPI, license) at the top of this `README.md` if desired.
- - Provide a short developer setup script or Makefile (or PowerShell script) to automate common tasks.
-
-**Contact / Author**
- - If you want this README customized (badges, license, screenshots, or deployment instructions), tell me what to include and I'll update it.
+**Коротко:** Django-проект для хранения расписания, новостей и управления пользователями (студенты, преподаватели, админы факультетов). Есть простое REST API и экспорт расписания (iCal / PDF / Excel).
 
 ---
 
-Generated: repository root `README.md` for the `university_double` Django project.
+## Как запустить (кратко)
+- Создать виртуальное окружение и активировать (PowerShell):
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+- Установить зависимости (рекомендуется создать `requirements.txt` и затем `pip install -r requirements.txt`):
+
+```powershell
+pip install --upgrade pip
+pip install django djangorestframework xhtml2pdf openpyxl icalendar
+```
+
+- Миграции и супер-пользователь:
+
+```powershell
+python manage.py migrate
+python manage.py createsuperuser
+```
+
+- Запуск dev-сервера:
+
+```powershell
+python manage.py runserver
+```
+
+Admin: `http://127.0.0.1:8000/admin/` — публичная часть: `/`.
+
+---
+
+## Файловая справка — важные файлы и что в них делает
+Ниже перечислены ключевые файлы и папки с коротким пояснением их назначения и важными функциями.
+
+- `manage.py` — стандартная точка входа Django для выполнения команд (`runserver`, `migrate`, `createsuperuser`).
+
+- `db.sqlite3` — файл SQLite (используется для разработки). Для продакшена рекомендуется заменить на PostgreSQL.
+
+### `university/` (проект)
+- `university/asgi.py` — точка входа ASGI для асинхронного сервера (если используете Daphne/Uvicorn).
+- `university/wsgi.py` — WSGI-приложение для Gunicorn/uWSGI.
+- `university/urls/main.py` — главный роутер приложения: регистрирует `admin/`, `accounts/` и маршруты API (`api/` через DRF router). Здесь подключены представления `home` и `faculty_detail`.
+
+#### `university/settings/`
+- `base.py` — базовые (общие) настройки проекта: INSTALLED_APPS (включая `rest_framework`), middleware, шаблоны, статические файлы, `AUTH_USER_MODEL = 'core.User'`, локаль (`ru-ru`) и пр.
+- `development.py` — настройки для разработки: `DEBUG = True`, `ALLOWED_HOSTS` и SQLite DB (используется при локальной разработке).
+- `production.py` — файл существует (пустой сейчас) — сюда поместите настройки продакшна (секреты, DB, allowed hosts).
+
+### `accounts/` (регистрация, вход, личный кабинет)
+- `accounts/views.py` — ключевые представления:
+	- `register` — форма регистрации (использует `RegistrationForm` из `forms.py`).
+	- `user_login` / `user_logout` — обработка аутентификации.
+	- `home` / `faculty_detail` — представления, которые используются в корневых маршрутах проекта.
+	- `cabinet` — личный кабинет пользователя: показывает расписание для текущего пользователя (студент/преподаватель/админ факультета).
+	- `export_ical` — экспорт расписания в формат `.ics` (использует `icalendar`).
+	- `export_pdf` — экспорт расписания в PDF (использует `xhtml2pdf` и шаблон `schedule/pdf_raspisanie.html`).
+	- `export_excel` — экспорт в Excel (`openpyxl`).
+- `accounts/urls.py` — маршруты для регистрации, логина, кабинета и экспортов (`export/ical/`, `export/pdf/`, `export/excel/`).
+- `accounts/forms.py` — `RegistrationForm` расширяет `UserCreationForm` и добавляет выбор роли (student/teacher), валидацию и автоматическое заполнение факультета/группы.
+- `accounts/models.py` — в текущей версии пустой (логика пользователя находится в `core.User`).
+- `accounts/admin.py` — регистрация моделей в админке (пока пустая или минимальная).
+
+### `core/` (основные модели и утилиты)
+- `core/models.py` — содержит основные модели: `Faculty`, `Department`, `Classroom`, и кастомную модель пользователя `User` (наследует `AbstractUser`), с полями `role`, `faculty`, `department`, `status`, `phone`, `photo`, `group`.
+	- `User` используется как `AUTH_USER_MODEL`.
+- `core/views.py` — пустой/заглушка для дополнительных общих представлений.
+- `core/admin.py` — содержит вспомогательные админ-классы (например фильтр по факультету) — используется в других `admin.py`.
+
+### `groups_app/` (группы студентов)
+- `groups_app/models.py` — `StudentGroup` модель: `name`, `faculty`, `course`, `students` (ManyToMany к `core.User`). Полезные методы: `students_count()`.
+- `groups_app/views.py` / `tests.py` / `admin.py` — вспомогательные, `admin.py` регистрирует модели в админке.
+
+### `schedule/` (расписание)
+- `schedule/models.py` — модель `Lesson` с полями: `subject`, `teacher (FK core.User)`, `group (FK StudentGroup)`, `classroom`, `day`, `time_start`, `time_end`, `week_type`. Порядок сортировки по дню и времени.
+- `schedule/admin.py` — `LessonAdmin` с фильтрами, поиском и `autocomplete_fields`.
+- `schedule/views.py` и `schedule/urls.py` — в репозитории пустые/заглушки; основная часть экспорта расписания реализована в `accounts.views` (экспорт iCal/PDF/Excel) и в модели `Lesson`.
+
+### `news/` (новости)
+- `news/models.py` — модель `News` с `title`, `content`, `faculty` (опционально), `created_at`, `updated_at`, `is_published`, `image`.
+- `news/views.py` / `news/admin.py` — представления и админ-интеграция для управления новостями (используются в `accounts.home` и `faculty_detail`).
+
+### `api/` (REST API)
+- `api/serializers.py` — `LessonSerializer` (ModelSerializer) для `schedule.Lesson` (поле `fields = '__all__'`).
+- `api/views.py` — `LessonViewSet` (DRF ModelViewSet). В `university/urls/main.py` он зарегистрирован в `DefaultRouter`, доступен по `/api/lessons/`.
+- `api/models.py` — пустой (здесь нет дополнительных моделей).
+
+### Шаблоны и статические файлы
+- `templates/` — содержит `base.html`, `messages.html`, `schedule_table.html` и подпапки для приложений (`accounts/`, `public/`, `schedule/`).
+	- `templates/schedule/pdf_raspisanie.html` — HTML-шаблон, используемый для генерации PDF экспорта.
+- `static/` — CSS/JS и ресурсы фронтенда.
+- `media/` — загружаемые файлы (аватары, изображения новостей и т.д.).
+
+### Миграции
+- В папках `*/migrations/` находятся autogenerated миграции (`0001_initial.py`, и т.д.). Не удаляйте их, они важны для воспроизводимости схемы.
+
+---
+
+## Советы по репозиторию
+- Добавьте `.venv/` в `.gitignore`, если вы ещё этого не сделали, и удалите закоммиченный виртуальный env (в репе есть `.venv/` сейчас). Я могу помочь с командами для очистки истории (git rm -r --cached .venv && .gitignore update).
+- Создайте `requirements.txt` (локально в виртуальном окружении):
+
+```powershell
+pip freeze > requirements.txt
+```
+
+- Заполните `university/settings/production.py` реальными продакшн-настроеками (секреты, DB URL, ALLOWED_HOSTS и т.д.).
+
+## Что я могу сделать дальше
+- Сгенерировать `requirements.txt` (хотите, чтобы я сделал это из текущего окружения?).
+- Создать/обновить `.gitignore` (включая `.venv/`, `*.pyc`, `__pycache__`, `db.sqlite3`).
+- Добавить примеры вызова API и пример CURL запроса к `/api/lessons/`.
+- Добавить блок в README с диаграммой/скриншотами (пришлите изображения).
+
+---
+
+Если хотите, я сейчас могу автоматически:
+- добавить `.venv/` в `.gitignore` и удалить уже закоммиченный `.venv` из индекса;
+- или сгенерировать `requirements.txt`.
+
+Напишите, что выполнить первым — сделаю и обновлю README при необходимости.
+
 
