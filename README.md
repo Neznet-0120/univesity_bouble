@@ -13,6 +13,8 @@ Brief project README for the Django web platform in this repository.
  - **Schedule management** and export/printing views (see `schedule` app and templates).
  - **News and announcements** (see `news` app).
  - **Administrative interface** via Django admin; models registered in each app's `admin.py`.
+ - **REST API**: a basic API is available in the `api` app (built with Django REST Framework).
+ - **PDF export**: schedule export to PDF is available (uses `xhtml2pdf`) via an export endpoint (e.g. `accounts` has `export/pdf/`).
 
 **Prerequisites**
  - Python 3.8+ (match your environment; project developed for standard Django 3.x/4.x workflows)
@@ -32,6 +34,9 @@ Brief project README for the Django web platform in this repository.
  pip install --upgrade pip
  pip install django
  ```
+```powershell
+pip install djangorestframework xhtml2pdf
+```
 
  3. Apply database migrations and create a superuser:
 
@@ -60,6 +65,7 @@ Brief project README for the Django web platform in this repository.
 	 - `groups_app/` : group-related models.
 	 - `news/` : news articles and admin integration.
 	 - `schedule/` : schedule models, views, and templates.
+		- `api/` : serializers and viewsets for REST API endpoints (requires `djangorestframework`).
  - `templates/` : project templates including `base.html`, `schedule_table.html`, and app-specific subfolders.
  - `static/` and `media/` : static files and uploaded media.
 
