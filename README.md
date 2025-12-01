@@ -89,9 +89,62 @@ Admin: `http://127.0.0.1:8000/admin/` — публичная часть: `/`.
 - `news/views.py` / `news/admin.py` — представления и админ-интеграция для управления новостями (используются в `accounts.home` и `faculty_detail`).
 
 ### `api/` (REST API)
-- `api/serializers.py` — `LessonSerializer` (ModelSerializer) для `schedule.Lesson` (поле `fields = '__all__'`).
-- `api/views.py` — `LessonViewSet` (DRF ModelViewSet). В `university/urls/main.py` он зарегистрирован в `DefaultRouter`, доступен по `/api/lessons/`.
-- `api/models.py` — пустой (здесь нет дополнительных моделей).
+
+В репозитории реализован REST API на Django REST Framework с набором viewset'ов и токенной аутентификацией.
+
+- `api/serializers.py` — сериализаторы для API:
+	- `FacultySerializer`, `DepartmentSerializer`, `ClassroomSerializer` — простые `ModelSerializer` для соответствующих моделей.
+	- `DepartmentSerializer` использует вложенный `FacultySerializer` для чтения и `faculty_id` (write-only `PrimaryKeyRelatedField`) для записи.
+	- `StudentGroupSerializer` использует вложенный `DepartmentSerializer` для чтения и `department_id` для записи.
+	- `LessonSerializer` использует `StringRelatedField` для `teacher`, `group` и `Classroom` (отображает строковое представление связанных объектов). Поля: `fields = '__all__'`.
+	- `NewsSerializer` помечает `author` как `StringRelatedField` и делает `author`, `created_at`, `updated_at` только для чтения при создании.
+	- `UserSerializer` возвращает базовые поля пользователя и `role_display` через `get_role_display` и вложенную информацию о `group`.
+
+- `api/views.py` — viewset'ы и логика доступа:
+	- `FacultyViewSet`, `DepartmentViewSet`, `ClassroomViewSet`, `StudentGroupViewSet`, `NewsViewSet`, `LessonViewSet` реализованы как `ModelViewSet` и защищены `IsAuthenticated`.
+	- `LessonViewSet.get_queryset()` ограничивает видимые занятия для студентов: если пользователь — студент и у него задана группа, API возвращает только уроки этой группы; иначе возвращается полный список, отсортированный по дню и времени.
+	- `NewsViewSet.perform_create()` автоматически сохраняет `author=self.request.user` при создании новости.
+	- `UserViewSet` реализован как `ViewSet` с экшеном `me` (`GET /api/profiles/me/`), который возвращает сериализованные данные текущего пользователя.
+
+- `api/views_auth.py` — токенная аутентификация и выход:
+	- `CustomAuthToken` (наследует `ObtainAuthToken`) в `post`-запросе валидирует логин/пароль и возвращает JSON с полями `token`, `user_id`, `username`, `role`, `first_name`, `last_name`, `group_id`.
+	- `LogoutView` (APIView, `permission_classes = [IsAuthenticated]`) удаляет `request.user.auth_token` при POST-запросе, возвращая подтверждение выхода или ошибку.
+
+- `api/urls.py` — маршруты API:
+	- Регистрирует viewset'ы через `DefaultRouter`: `faculties`, `departments`, `classrooms`, `groups`, `lessons`, `news`, `profiles`.
+	- Подключает маршруты аутентификации:
+		- `POST /api/auth/login/` → `CustomAuthToken` (возвращает токен)
+		- `POST /api/auth/logout/` → `LogoutView` (требует токен в заголовке, удаляет токен)
+	- Полный набор эндпоинтов доступен под префиксом `/api/` (в `university/urls/main.py` этот роутер подключён как `path("api/", include(router.urls))`).
+
+- `api/models.py` — пустой (в текущей версии дополнительных моделей для API нет).
+
+Примеры запросов:
+
+ - Получить уроки своей группы (студент):
+
+```bash
+curl -H "Authorization: Token <your_token>" http://127.0.0.1:8000/api/lessons/
+```
+
+ - Получение данных текущего пользователя:
+
+```bash
+curl -H "Authorization: Token <your_token>" http://127.0.0.1:8000/api/profiles/me/
+```
+
+ - Вход (получение токена):
+
+```bash
+curl -X POST -d "username=USER&password=PASS" http://127.0.0.1:8000/api/auth/login/
+```
+
+ - Выход (удаление токена):
+
+```bash
+curl -X POST -H "Authorization: Token <your_token>" http://127.0.0.1:8000/api/auth/logout/
+```
+
 
 ### Шаблоны и статические файлы
 - `templates/` — содержит `base.html`, `messages.html`, `schedule_table.html` и подпапки для приложений (`accounts/`, `public/`, `schedule/`).
