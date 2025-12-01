@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",  # DRF
 
     # Наши приложения
     "core",
@@ -25,6 +26,7 @@ INSTALLED_APPS = [
     "news",
     "schedule",
     "groups_app",
+    "api"
 ]
 
 MIDDLEWARE = [
